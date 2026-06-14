@@ -17,17 +17,14 @@ export default function CallbackPage() {
       return;
     }
 
-    // Guardar token y obtener datos del usuario
-    localStorage.setItem('token', token);
+    useAuthStore.setState({ token });
 
     api.get('/users/me').then(({ data }) => {
       setAuth(data, token);
-
-      // Si no tiene nombre aún → onboarding, si no → swipe
       if (!data.name) {
         router.replace('/auth/onboarding');
       } else {
-        router.replace('/swipe');
+        router.replace('/profile');
       }
     }).catch(() => {
       router.replace('/');
