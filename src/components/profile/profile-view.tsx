@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { getFacultyByCareer } from '@/lib/careers';
 
 export function ProfileView() {
   const { data: user, isLoading } = useMe();
@@ -42,8 +43,17 @@ export function ProfileView() {
           )}
 
           <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-            {user.faculty && <span>📚 {user.faculty}</span>}
-            {user.yearJoined && <span>🎓 Ingresó en {user.yearJoined}</span>}
+            {user.career && (
+              <span>
+                {user.career}
+                {' '}
+                <span className="text-xs opacity-70">
+                  — {getFacultyByCareer(user.career) ?? user.faculty}
+                </span>
+              </span>
+            )}
+            {!user.career && user.faculty && <span>{user.faculty}</span>}
+            {user.yearJoined && <span>Ingresó en {user.yearJoined}</span>}
           </div>
 
         </CardContent>

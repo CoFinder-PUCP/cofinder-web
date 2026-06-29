@@ -8,6 +8,7 @@ interface User {
   avatar: string | null;
   role: 'STUDENT' | 'ALUMNI' | 'ADMIN';
   bio: string | null;
+  career: string | null;
   faculty: string | null;
   yearJoined: number | null;
   skills: string[];

@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api';
 import { useMe } from '@/hooks/use-me';
+import { CareerSelect } from '@/components/ui/career-select';
+import { getFacultyByCareer } from '@/lib/careers';
 
 const SKILLS_OPTIONS = [
   'Backend', 'Frontend', 'Mobile', 'UI/UX', 'Marketing',
@@ -28,7 +30,7 @@ export function ProfileEditForm() {
 
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
-  const [faculty, setFaculty] = useState('');
+  const [career, setCareer] = useState('');
   const [yearJoined, setYearJoined] = useState('');
   const [skills, setSkills] = useState<string[]>([]);
   const [lookingFor, setLookingFor] = useState<string[]>([]);
@@ -37,7 +39,7 @@ export function ProfileEditForm() {
     if (user) {
       setName(user.name ?? '');
       setBio(user.bio ?? '');
-      setFaculty(user.faculty ?? '');
+      setCareer(user.career ?? '');
       setYearJoined(user.yearJoined?.toString() ?? '');
       setSkills(user.skills ?? []);
       setLookingFor(user.lookingFor ?? []);
@@ -50,10 +52,11 @@ export function ProfileEditForm() {
 
   const { mutate, isPending, error } = useMutation({
     mutationFn: async () => {
+      const faculty = career ? getFacultyByCareer(career) : undefined;
       const { data } = await api.patch('/users/me', {
         ...(name.trim() ? { name: name.trim() } : {}),
         ...(bio.trim() ? { bio: bio.trim() } : {}),
-        ...(faculty.trim() ? { faculty: faculty.trim() } : {}),
+        ...(career ? { career, faculty } : {}),
         ...(yearJoined ? { yearJoined: parseInt(yearJoined) } : {}),
         skills,
         lookingFor,
@@ -94,14 +97,7 @@ export function ProfileEditForm() {
         <p className="text-xs text-muted-foreground text-right">{bio.length}/300</p>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="faculty">Facultad</Label>
-        <Input
-          id="faculty"
-          value={faculty}
-          onChange={(e) => setFaculty(e.target.value)}
-        />
-      </div>
+      <CareerSelect value={career} onChange={setCareer} />
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="year">Año de ingreso</Label>
