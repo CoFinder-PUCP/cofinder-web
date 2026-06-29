@@ -34,6 +34,7 @@ interface Project {
   stage: string;
   categories: string[];
   budget: number | null;
+  budgetCurrency: 'USD' | 'PEN' | null;
   rolesNeeded: string[];
 }
 
@@ -47,6 +48,7 @@ function ProjectCard({ project }: { project: Project }) {
   const [categories, setCategories] = useState<string[]>(project.categories);
   const [customCat, setCustomCat] = useState('');
   const [budget, setBudget] = useState(project.budget?.toString() ?? '');
+  const [budgetCurrency, setBudgetCurrency] = useState<'USD' | 'PEN'>(project.budgetCurrency ?? 'USD');
   const [rolesNeeded, setRolesNeeded] = useState<string[]>(project.rolesNeeded);
 
   const toggleCategory = (cat: string) =>
@@ -65,7 +67,8 @@ function ProjectCard({ project }: { project: Project }) {
     mutationFn: async () => {
       const { data } = await api.patch(`/projects/${project.id}`, {
         title, description, stage, categories,
-        budget: budget ? parseInt(budget) : undefined,
+        budget: budget ? parseFloat(parseFloat(budget).toFixed(2)) : undefined,
+        budgetCurrency: budget ? budgetCurrency : undefined,
         rolesNeeded,
       });
       return data;
@@ -122,8 +125,18 @@ function ProjectCard({ project }: { project: Project }) {
               ))}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Presupuesto (USD)</Label>
-              <Input type="number" min={1} value={budget} onChange={(e) => setBudget(e.target.value)} />
+              <Label>Presupuesto</Label>
+              <div className="flex gap-2">
+                <select
+                  value={budgetCurrency}
+                  onChange={(e) => setBudgetCurrency(e.target.value as 'USD' | 'PEN')}
+                  className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="USD">USD ($)</option>
+                  <option value="PEN">PEN (S/)</option>
+                </select>
+                <Input type="number" min={0.01} step={0.01} value={budget} onChange={(e) => setBudget(e.target.value)} className="flex-1" />
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <Label>Roles</Label>
@@ -160,7 +173,9 @@ function ProjectCard({ project }: { project: Project }) {
         )}
         <p className="text-sm leading-relaxed">{project.description}</p>
         {project.budget != null && (
-          <p className="text-sm text-muted-foreground">Presupuesto: ${project.budget.toLocaleString()}</p>
+          <p className="text-sm text-muted-foreground">
+            Presupuesto: {project.budgetCurrency === 'PEN' ? 'S/' : '$'}{project.budget.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
         )}
         {project.rolesNeeded.length > 0 && (
           <div className="flex flex-col gap-1.5">

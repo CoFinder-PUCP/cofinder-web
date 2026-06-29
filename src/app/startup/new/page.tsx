@@ -36,6 +36,7 @@ export default function NewProjectPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [customCat, setCustomCat] = useState('');
   const [budget, setBudget] = useState('');
+  const [budgetCurrency, setBudgetCurrency] = useState<'USD' | 'PEN'>('USD');
   const [rolesNeeded, setRolesNeeded] = useState<string[]>([]);
 
   const toggleCategory = (cat: string) =>
@@ -63,7 +64,8 @@ export default function NewProjectPage() {
         description,
         stage,
         categories,
-        budget: budget ? parseInt(budget) : undefined,
+        budget: budget ? parseFloat(parseFloat(budget).toFixed(2)) : undefined,
+        budgetCurrency: budget ? budgetCurrency : undefined,
         rolesNeeded,
       });
       return data;
@@ -143,8 +145,18 @@ export default function NewProjectPage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="budget">Presupuesto (USD, opcional)</Label>
-            <Input id="budget" type="number" min={1} value={budget} onChange={(e) => setBudget(e.target.value)} />
+            <Label htmlFor="budget">Presupuesto (opcional)</Label>
+            <div className="flex gap-2">
+              <select
+                value={budgetCurrency}
+                onChange={(e) => setBudgetCurrency(e.target.value as 'USD' | 'PEN')}
+                className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="USD">USD ($)</option>
+                <option value="PEN">PEN (S/)</option>
+              </select>
+              <Input id="budget" type="number" min={0.01} step={0.01} value={budget} onChange={(e) => setBudget(e.target.value)} className="flex-1" />
+            </div>
           </div>
 
           <div className="flex flex-col gap-2">

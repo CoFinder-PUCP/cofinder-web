@@ -16,6 +16,7 @@ interface Project {
   stage: string;
   categories: string[];
   budget: number | null;
+  budgetCurrency: 'USD' | 'PEN' | null;
   rolesNeeded: string[];
   founder: { id: string; name: string | null; avatar: string | null };
   teamMembers: { role: string }[];
@@ -114,7 +115,9 @@ export default function SwipePage() {
               )}
 
               {current.budget != null && (
-                <p className="text-sm text-muted-foreground">Presupuesto: ${current.budget.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">
+                  Presupuesto: {current.budgetCurrency === 'PEN' ? 'S/' : '$'}{current.budget.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
               )}
 
               <p className="text-sm text-muted-foreground">
