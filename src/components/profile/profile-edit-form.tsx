@@ -51,10 +51,10 @@ export function ProfileEditForm() {
   const { mutate, isPending, error } = useMutation({
     mutationFn: async () => {
       const { data } = await api.patch('/users/me', {
-        name,
-        bio,
-        faculty,
-        yearJoined: yearJoined ? parseInt(yearJoined) : undefined,
+        ...(name.trim() ? { name: name.trim() } : {}),
+        ...(bio.trim() ? { bio: bio.trim() } : {}),
+        ...(faculty.trim() ? { faculty: faculty.trim() } : {}),
+        ...(yearJoined ? { yearJoined: parseInt(yearJoined) } : {}),
         skills,
         lookingFor,
       });
@@ -89,7 +89,9 @@ export function ProfileEditForm() {
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           rows={3}
+          maxLength={300}
         />
+        <p className="text-xs text-muted-foreground text-right">{bio.length}/300</p>
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -144,14 +146,21 @@ export function ProfileEditForm() {
       </div>
 
       {error && (
-        <p className="text-sm text-destructive">Ocurrió un error. Intenta de nuevo.</p>
+        <div className="text-sm text-destructive flex flex-col gap-0.5">
+          {((error as any)?.response?.data?.errors as { path: string[]; message: string }[] | undefined)
+            ?.map((e, i) => (
+              <p key={i}>{e.path?.length ? `${e.path.join('.')}: ` : ''}{e.message}</p>
+            )) ?? (
+            <p>{(error as any)?.response?.data?.message ?? 'Ocurrió un error. Intenta de nuevo.'}</p>
+          )}
+        </div>
       )}
 
       <div className="flex gap-3">
         <Button type="button" variant="outline" className="flex-1" onClick={() => router.back()}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={isPending} className="flex-1">
+        <Button type="submit" disabled={isPending || name.trim().length < 2} className="flex-1">
           {isPending ? 'Guardando...' : 'Guardar cambios'}
         </Button>
       </div>

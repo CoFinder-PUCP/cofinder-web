@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 
 interface RawMatch {
   id: string;
-  startupId: string;
+  projectId: string;
   chat: {
     id: string;
     messages: { content: string; createdAt: string }[];
@@ -24,9 +24,9 @@ interface Startup {
 
 function MatchRow({ match }: { match: RawMatch }) {
   const { data: startup } = useQuery<Startup>({
-    queryKey: ['startup', match.startupId],
+    queryKey: ['project', match.projectId],
     queryFn: async () => {
-      const { data } = await api.get(`/startups/${match.startupId}`);
+      const { data } = await api.get(`/projects/${match.projectId}`);
       return data;
     },
     staleTime: 1000 * 60 * 5,

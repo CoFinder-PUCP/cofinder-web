@@ -20,7 +20,7 @@ interface Message {
 
 interface Match {
   id: string;
-  startupId: string;
+  projectId: string;
   chat: { id: string };
 }
 
@@ -52,12 +52,12 @@ export default function ChatPage() {
   });
 
   const { data: startup } = useQuery<Startup>({
-    queryKey: ['startup', match?.startupId],
+    queryKey: ['project', match?.projectId],
     queryFn: async () => {
-      const { data } = await api.get(`/startups/${match!.startupId}`);
+      const { data } = await api.get(`/projects/${match!.projectId}`);
       return data;
     },
-    enabled: !!match?.startupId,
+    enabled: !!match?.projectId,
     staleTime: 1000 * 60 * 5,
   });
 

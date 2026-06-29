@@ -39,10 +39,10 @@ export function OnboardingForm() {
   const { mutate, isPending, error } = useMutation({
     mutationFn: async () => {
       const { data } = await api.patch('/users/me', {
-        name,
-        bio,
-        faculty,
-        yearJoined: yearJoined ? parseInt(yearJoined) : undefined,
+        name: name.trim(),
+        ...(bio.trim() ? { bio: bio.trim() } : {}),
+        ...(faculty.trim() ? { faculty: faculty.trim() } : {}),
+        ...(yearJoined ? { yearJoined: parseInt(yearJoined) } : {}),
         skills,
         lookingFor,
       });

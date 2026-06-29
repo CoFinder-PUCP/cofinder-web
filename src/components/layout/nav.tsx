@@ -24,7 +24,7 @@ export function Nav() {
           Matches
         </Link>
         <Link href="/startup/mine" className={cls(['/startup'])}>
-          Startup
+          Proyectos
         </Link>
         <Link href="/profile" className={cls(['/profile'])}>
           Perfil
