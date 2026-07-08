@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Nav } from '@/components/layout/nav';
 import { useRequireAuth } from '@/hooks/use-require-auth';
@@ -17,7 +18,7 @@ interface Project {
   categories: string[];
   budget: number | null;
   budgetCurrency: 'USD' | 'PEN' | null;
-  rolesNeeded: string[];
+  openings: { id: string; title: string; isOpen: boolean }[];
   founder: { id: string; name: string | null; avatar: string | null };
   teamMembers: { role: string }[];
 }
@@ -70,7 +71,7 @@ export default function SwipePage() {
 
         {matchNotice && (
           <div className="bg-green-50 border border-green-200 text-green-800 rounded-lg px-4 py-3 text-sm">
-            ¡Aplicaste a <strong>{matchNotice}</strong>! Revisa tus matches para chatear.
+            ¡Hiciste match con <strong>{matchNotice}</strong>! Ya puedes chatear con el founder desde Matches.
           </div>
         )}
 
@@ -89,7 +90,9 @@ export default function SwipePage() {
           <Card>
             <CardContent className="pt-6 flex flex-col gap-4">
               <div className="flex items-start justify-between gap-2">
-                <h2 className="text-lg font-semibold">{current.title}</h2>
+                <Link href={`/projects/${current.id}`} className="text-lg font-semibold hover:underline">
+                  {current.title}
+                </Link>
                 <Badge variant="outline">{current.stage}</Badge>
               </div>
 
@@ -103,12 +106,12 @@ export default function SwipePage() {
 
               <p className="text-sm leading-relaxed">{current.description}</p>
 
-              {current.rolesNeeded.length > 0 && (
+              {current.openings.some((o) => o.isOpen) && (
                 <div className="flex flex-col gap-1.5">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Buscan</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {current.rolesNeeded.map((r) => (
-                      <Badge key={r} variant="outline">{r}</Badge>
+                    {current.openings.filter((o) => o.isOpen).map((o) => (
+                      <Badge key={o.id} variant="outline">{o.title}</Badge>
                     ))}
                   </div>
                 </div>
@@ -131,7 +134,7 @@ export default function SwipePage() {
                 </Button>
                 <Button className="flex-1" disabled={isPending}
                   onClick={() => swipe({ projectId: current.id, direction: 'RIGHT' })}>
-                  Aplicar
+                  Me interesa
                 </Button>
               </div>
             </CardContent>

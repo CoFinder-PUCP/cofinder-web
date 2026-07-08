@@ -66,11 +66,11 @@ export default function NewProjectPage() {
         categories,
         budget: budget ? parseFloat(parseFloat(budget).toFixed(2)) : undefined,
         budgetCurrency: budget ? budgetCurrency : undefined,
-        rolesNeeded,
+        openings: rolesNeeded.map((title) => ({ title })),
       });
       return data;
     },
-    onSuccess: () => router.push('/startup/mine'),
+    onSuccess: () => router.push('/projects/mine'),
   });
 
   if (!hasHydrated || !isAuthenticated) {
@@ -160,7 +160,7 @@ export default function NewProjectPage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Roles que buscas *</Label>
+            <Label>Convocatorias: roles que buscas *</Label>
             <div className="flex flex-wrap gap-2">
               {ROLES_OPTIONS.map((r) => (
                 <Badge key={r} variant={rolesNeeded.includes(r) ? 'default' : 'outline'} className="cursor-pointer" onClick={() => toggleRole(r)}>

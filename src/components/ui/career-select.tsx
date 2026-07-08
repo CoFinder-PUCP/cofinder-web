@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CAREERS_BY_FACULTY, getFacultyByCareer } from '@/lib/careers';
 import { Label } from '@/components/ui/label';
 
@@ -12,20 +12,16 @@ interface CareerSelectProps {
 }
 
 export function CareerSelect({ id = 'career', value, onChange, label = 'Carrera' }: CareerSelectProps) {
-  const [faculty, setFaculty] = useState(() => (value ? (getFacultyByCareer(value) ?? '') : ''));
-
-  useEffect(() => {
-    if (value) {
-      const f = getFacultyByCareer(value);
-      if (f) setFaculty(f);
-    }
-  }, [value]);
+  // La facultad se deriva de la carrera elegida; el override solo aplica
+  // mientras el usuario cambia de facultad y aún no elige carrera.
+  const [facultyOverride, setFacultyOverride] = useState('');
+  const faculty = (value ? getFacultyByCareer(value) : undefined) ?? facultyOverride;
 
   const faculties = Object.keys(CAREERS_BY_FACULTY);
   const careers = faculty ? (CAREERS_BY_FACULTY[faculty] ?? []) : [];
 
   const handleFacultyChange = (newFaculty: string) => {
-    setFaculty(newFaculty);
+    setFacultyOverride(newFaculty);
     onChange('');
   };
 

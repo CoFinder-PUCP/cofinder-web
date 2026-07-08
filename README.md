@@ -58,28 +58,53 @@ La app corre en `http://localhost:3001` (el puerto 3000 lo ocupa el backend en D
 src/
 ├── app/
 │   ├── layout.tsx                  # Layout raíz con QueryProvider
-│   ├── page.tsx                    # Home — redirige a /profile si hay sesión
-│   └── auth/
-│       ├── callback/page.tsx       # Recibe token OAuth, hidrata el store
-│       └── onboarding/page.tsx     # Completar perfil tras primer login
-│   └── profile/
-│       ├── page.tsx                # Ver perfil propio
-│       └── edit/page.tsx           # Editar perfil
-├── components/
+│   ├── page.tsx                    # Home — redirige a /projects si hay sesión
 │   ├── auth/
-│   │   └── login-button.tsx        # Botón "Continuar con Google"
-│   ├── layout/
-│   │   └── query-provider.tsx      # TanStack Query client provider
-│   ├── onboarding/
-│   │   └── onboarding-form.tsx     # Formulario de primer perfil
+│   │   ├── callback/page.tsx       # Recibe token OAuth, hidrata el store
+│   │   └── onboarding/page.tsx     # Completar perfil tras primer login
 │   ├── profile/
-│   │   ├── profile-view.tsx        # Vista de perfil
-│   │   └── profile-edit-form.tsx   # Formulario de edición
+│   │   ├── page.tsx                # Perfil propio (con proyectos y membresías)
+│   │   └── edit/page.tsx           # Editar perfil
+│   ├── feed/page.tsx               # Feed comunitario (posts, likes, comentarios)
+│   ├── projects/
+│   │   ├── page.tsx                # Explorar (grid + filtros + orden Para ti/Recientes)
+│   │   ├── [id]/page.tsx           # Detalle: equipo, postular a convocatoria, solicitudes
+│   │   ├── new/page.tsx            # Publicar proyecto (con convocatorias)
+│   │   └── mine/page.tsx           # Mis proyectos (editar, gestionar convocatorias)
+│   ├── events/
+│   │   ├── page.tsx                # Eventos próximos y pasados
+│   │   ├── new/page.tsx            # Publicar evento
+│   │   └── [id]/page.tsx           # Detalle, inscripción (solo o con equipo), inscritos
+│   ├── swipe/page.tsx              # Descubrir proyectos (ordenado por afinidad)
+│   ├── people/page.tsx             # Directorio de personas (búsqueda por skills/carrera)
+│   ├── users/[id]/page.tsx         # Perfil público + invitar a mi proyecto
+│   ├── applications/page.tsx       # Mis postulaciones, invitaciones y equipos
+│   ├── matches/page.tsx            # Matches (mis intereses / interesados en mis proyectos)
+│   └── chat/
+│       ├── [matchId]/page.tsx      # Chat 1:1 del match
+│       └── team/[projectId]/page.tsx  # Chat grupal del equipo
+├── components/
+│   ├── auth/login-button.tsx       # Botón "Continuar con Google"
+│   ├── chat/chat-room.tsx          # Sala reutilizable: typing, ✓✓ visto, socket
+│   ├── layout/
+│   │   ├── nav.tsx                 # Navegación + búsqueda global + campana
+│   │   ├── global-search.tsx       # GET /search con debounce y dropdown
+│   │   ├── pwa-register.tsx        # Registra el service worker (public/sw.js)
+│   │   └── query-provider.tsx      # TanStack Query client provider
+│   ├── notifications/notification-bell.tsx  # Socket realtime + polling fallback
+│   ├── push/push-toggle.tsx        # Activar/desactivar push de este dispositivo
+│   ├── onboarding/onboarding-form.tsx
+│   ├── profile/                    # Vista y edición del perfil propio
+│   ├── projects/project-card.tsx   # Card de proyecto para el grid
+│   ├── team/invite-button.tsx      # Invitar a un usuario a mis proyectos
 │   └── ui/                         # Componentes shadcn/ui
 ├── hooks/
-│   └── use-me.ts                   # Query del usuario autenticado (/users/me)
+│   ├── use-me.ts                   # Query del usuario autenticado (/users/me)
+│   └── use-require-auth.ts         # Redirige a / si no hay sesión
 ├── lib/
-│   └── api.ts                      # Instancia de axios con interceptor de JWT
+│   ├── api.ts                      # Instancia de axios con interceptor de JWT
+│   ├── types.ts                    # Tipos compartidos de la API + constantes
+│   └── careers.ts                  # Carreras y facultades PUCP
 └── store/
     └── auth.store.ts               # Zustand store con persist (token + user)
 ```
@@ -112,8 +137,36 @@ El token se persiste en `localStorage` bajo la key `auth-storage` (Zustand persi
 | US-01 | Pantalla de login con Google | `/` |
 | US-02 | Callback OAuth, guarda token | `/auth/callback` |
 | US-03 | Onboarding (primer perfil) | `/auth/onboarding` |
-| US-04 | Ver perfil propio | `/profile` |
+| US-04 | Ver perfil propio (proyectos + membresías) | `/profile` |
 | US-05 | Editar perfil | `/profile/edit` |
+| US-06 | Publicar y administrar mis proyectos | `/projects/new`, `/projects/mine` |
+| US-07 | Explorar proyectos con filtros y búsqueda | `/projects` |
+| US-08 | Descubrir proyectos estilo swipe | `/swipe` |
+| US-09 | Ver detalle de proyecto y postular a un rol | `/projects/[id]` |
+| US-10 | Gestionar postulaciones como founder (aceptar/rechazar) | `/projects/[id]` |
+| US-11 | Mis postulaciones, invitaciones y equipos | `/applications` |
+| US-12 | Directorio de personas e invitación a proyectos | `/people`, `/users/[id]` |
+| US-13 | Matches con no-leídos, propios y entrantes | `/matches` |
+| US-14 | Chat en tiempo real con founder/interesado | `/chat/[matchId]` |
+| US-15 | Notificaciones in-app en tiempo real (socket + campana) | global |
+| US-16 | Feed comunitario: publicar, likes, comentarios | `/feed` |
+| US-17 | Convocatorias por rol: crear, abrir/cerrar, postular | `/projects/*` |
+| US-18 | Chat grupal del equipo del proyecto | `/chat/team/[projectId]` |
+| US-19 | Búsqueda global de proyectos y personas | nav |
+| US-20 | Feed ordenado por afinidad ("Para ti") | `/projects`, `/swipe` |
+| US-21 | Typing indicator y confirmación de lectura (✓✓) | chats |
+| US-22 | Preferencias de email (avisos + resumen semanal) | `/profile/edit` |
+| US-23 | Panel de administración: métricas y moderación | `/admin` (solo ADMIN) |
+| US-24 | Landing con vitrina pública de proyectos y eventos | `/` (sin login) |
+| US-25 | Eventos: publicar, explorar e inscribirse (solo o con equipo) | `/events`, `/events/new`, `/events/[id]` |
+| US-26 | Badges de reputación calculados del historial | perfiles |
+| US-27 | Endorsements de skills entre compañeros de equipo | `/users/[id]` |
+| US-28 | Reportar contenido + bandeja de moderación | toda la UI / `/admin` |
+| US-29 | PWA instalable + notificaciones push por dispositivo | global / `/profile/edit` |
+| US-30 | Funnel de conversión en el panel admin | `/admin` |
+
+> El modelo de producto (híbrido: chat inmediato + membresía aprobada por el
+> founder) y las fases siguientes están documentados en `../ROADMAP.md`.
 
 ---
 

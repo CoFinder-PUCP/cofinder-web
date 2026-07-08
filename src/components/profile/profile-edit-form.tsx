@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { api } from '@/lib/api';
 import { useMe } from '@/hooks/use-me';
 import { CareerSelect } from '@/components/ui/career-select';
 import { getFacultyByCareer } from '@/lib/careers';
+import { PushToggle } from '@/components/push/push-toggle';
 
 const SKILLS_OPTIONS = [
   'Backend', 'Frontend', 'Mobile', 'UI/UX', 'Marketing',
@@ -23,28 +24,48 @@ const LOOKING_FOR_OPTIONS = [
   'Product Manager', 'Marketer', 'Investor', 'Mentor', 'Co-founder',
 ];
 
+interface EditableUser {
+  name: string | null;
+  bio: string | null;
+  career: string | null;
+  yearJoined: number | null;
+  skills: string[] | null;
+  lookingFor: string[] | null;
+  emailNotifications: boolean;
+  emailWeeklyDigest: boolean;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+      errors?: { path: string[]; message: string }[];
+    };
+  };
+}
+
 export function ProfileEditForm() {
-  const router = useRouter();
-  const queryClient = useQueryClient();
   const { data: user, isLoading } = useMe();
 
-  const [name, setName] = useState('');
-  const [bio, setBio] = useState('');
-  const [career, setCareer] = useState('');
-  const [yearJoined, setYearJoined] = useState('');
-  const [skills, setSkills] = useState<string[]>([]);
-  const [lookingFor, setLookingFor] = useState<string[]>([]);
+  if (isLoading || !user) {
+    return <p className="text-muted-foreground text-sm">Cargando...</p>;
+  }
 
-  useEffect(() => {
-    if (user) {
-      setName(user.name ?? '');
-      setBio(user.bio ?? '');
-      setCareer(user.career ?? '');
-      setYearJoined(user.yearJoined?.toString() ?? '');
-      setSkills(user.skills ?? []);
-      setLookingFor(user.lookingFor ?? []);
-    }
-  }, [user]);
+  return <ProfileEditFormInner user={user} />;
+}
+
+function ProfileEditFormInner({ user }: { user: EditableUser }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const [name, setName] = useState(user.name ?? '');
+  const [bio, setBio] = useState(user.bio ?? '');
+  const [career, setCareer] = useState(user.career ?? '');
+  const [yearJoined, setYearJoined] = useState(user.yearJoined?.toString() ?? '');
+  const [skills, setSkills] = useState<string[]>(user.skills ?? []);
+  const [lookingFor, setLookingFor] = useState<string[]>(user.lookingFor ?? []);
+  const [emailNotifications, setEmailNotifications] = useState(user.emailNotifications);
+  const [emailWeeklyDigest, setEmailWeeklyDigest] = useState(user.emailWeeklyDigest);
 
   const toggle = (list: string[], item: string, setter: (v: string[]) => void) => {
     setter(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
@@ -60,6 +81,8 @@ export function ProfileEditForm() {
         ...(yearJoined ? { yearJoined: parseInt(yearJoined) } : {}),
         skills,
         lookingFor,
+        emailNotifications,
+        emailWeeklyDigest,
       });
       return data;
     },
@@ -69,7 +92,7 @@ export function ProfileEditForm() {
     },
   });
 
-  if (isLoading) return <p className="text-muted-foreground text-sm">Cargando...</p>;
+  const apiError = error as ApiError | null;
 
   return (
     <form
@@ -141,13 +164,39 @@ export function ProfileEditForm() {
         </div>
       </div>
 
-      {error && (
+      <div className="flex flex-col gap-2">
+        <Label>Correos</Label>
+        <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <input
+            type="checkbox"
+            checked={emailNotifications}
+            onChange={(e) => setEmailNotifications(e.target.checked)}
+            className="accent-primary"
+          />
+          Avisarme por email de invitaciones, postulaciones y aceptaciones
+        </label>
+        <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <input
+            type="checkbox"
+            checked={emailWeeklyDigest}
+            onChange={(e) => setEmailWeeklyDigest(e.target.checked)}
+            className="accent-primary"
+          />
+          Recibir el resumen semanal de la comunidad
+        </label>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label>Notificaciones push</Label>
+        <PushToggle />
+      </div>
+
+      {apiError && (
         <div className="text-sm text-destructive flex flex-col gap-0.5">
-          {((error as any)?.response?.data?.errors as { path: string[]; message: string }[] | undefined)
-            ?.map((e, i) => (
-              <p key={i}>{e.path?.length ? `${e.path.join('.')}: ` : ''}{e.message}</p>
-            )) ?? (
-            <p>{(error as any)?.response?.data?.message ?? 'Ocurrió un error. Intenta de nuevo.'}</p>
+          {apiError.response?.data?.errors?.map((e, i) => (
+            <p key={i}>{e.path?.length ? `${e.path.join('.')}: ` : ''}{e.message}</p>
+          )) ?? (
+            <p>{apiError.response?.data?.message ?? 'Ocurrió un error. Intenta de nuevo.'}</p>
           )}
         </div>
       )}

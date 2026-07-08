@@ -56,6 +56,16 @@ export function ProfileView() {
             {user.yearJoined && <span>Ingresó en {user.yearJoined}</span>}
           </div>
 
+          {user.badges?.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {user.badges.map((b: { id: string; emoji: string; label: string; description: string }) => (
+                <Badge key={b.id} variant="outline" title={b.description}>
+                  {b.emoji} {b.label}
+                </Badge>
+              ))}
+            </div>
+          )}
+
         </CardContent>
       </Card>
 
@@ -63,9 +73,15 @@ export function ProfileView() {
         <div className="flex flex-col gap-2">
           <p className="text-sm font-medium">Habilidades</p>
           <div className="flex flex-wrap gap-2">
-            {user.skills.map((s: string) => (
-              <Badge key={s} variant="secondary">{s}</Badge>
-            ))}
+            {user.skills.map((s: string) => {
+              const count = user.endorsements?.[s]?.count ?? 0;
+              return (
+                <Badge key={s} variant="secondary" title={count ? `${count} endorsement(s) de tus compañeros` : undefined}>
+                  {s}
+                  {count ? ` · ${count} ⭐` : ''}
+                </Badge>
+              );
+            })}
           </div>
         </div>
       )}
@@ -78,6 +94,43 @@ export function ProfileView() {
               <Badge key={l} variant="outline">{l}</Badge>
             ))}
           </div>
+        </div>
+      )}
+
+      {user.projects?.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium">Mis proyectos</p>
+          {user.projects.map((p: { id: string; title: string; stage: string }) => (
+            <Link key={p.id} href={`/projects/${p.id}`}>
+              <Card className="hover:bg-accent/50 transition-colors">
+                <CardContent className="pt-3 pb-3 flex items-center justify-between gap-2">
+                  <p className="text-sm font-medium">{p.title}</p>
+                  <Badge variant="outline">{p.stage}</Badge>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {user.teamMembers?.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium">Miembro de</p>
+          {user.teamMembers.map(
+            (tm: { id: string; role: string; project: { id: string; title: string; stage: string } }) => (
+              <Link key={tm.id} href={`/projects/${tm.project.id}`}>
+                <Card className="hover:bg-accent/50 transition-colors">
+                  <CardContent className="pt-3 pb-3 flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium">{tm.project.title}</p>
+                      <p className="text-xs text-muted-foreground">{tm.role}</p>
+                    </div>
+                    <Badge variant="outline">{tm.project.stage}</Badge>
+                  </CardContent>
+                </Card>
+              </Link>
+            ),
+          )}
         </div>
       )}
 

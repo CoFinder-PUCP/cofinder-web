@@ -3,7 +3,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { api } from '@/lib/api';
 
 export function useMe() {
-  const { token, setAuth } = useAuthStore();
+  const token = useAuthStore((s) => s.token);
 
   return useQuery({
     queryKey: ['me'],

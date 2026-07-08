@@ -21,11 +21,12 @@ const PRESET_CATEGORIES = [
   'Real Estate', 'Agro', 'Seguridad', 'IoT', 'Entretenimiento',
 ];
 
-const ROLES_OPTIONS = [
-  'Backend Developer', 'Frontend Developer', 'Mobile Developer',
-  'Designer', 'Product Manager', 'Marketing', 'Sales',
-  'Data Scientist', 'DevOps', 'Finance', 'Legal',
-];
+interface Opening {
+  id: string;
+  title: string;
+  description: string | null;
+  isOpen: boolean;
+}
 
 interface Project {
   id: string;
@@ -35,7 +36,92 @@ interface Project {
   categories: string[];
   budget: number | null;
   budgetCurrency: 'USD' | 'PEN' | null;
-  rolesNeeded: string[];
+  openings: Opening[];
+  teamMembers: { id: string; role: string; user: { id: string; name: string | null } }[];
+  _count?: { teamMembers: number; matches: number };
+}
+
+/** Gestión de convocatorias: abrir/cerrar, eliminar y agregar. */
+function OpeningsManager({ project }: { project: Project }) {
+  const queryClient = useQueryClient();
+  const [newTitle, setNewTitle] = useState('');
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['my-projects'] });
+
+  const { mutate: toggleOpening } = useMutation({
+    mutationFn: (o: Opening) => api.patch(`/projects/openings/${o.id}`, { isOpen: !o.isOpen }),
+    onSuccess: invalidate,
+  });
+
+  const { mutate: removeOpening } = useMutation({
+    mutationFn: (id: string) => api.delete(`/projects/openings/${id}`),
+    onSuccess: invalidate,
+  });
+
+  const { mutate: addOpening, isPending: isAdding } = useMutation({
+    mutationFn: () => api.post(`/projects/${project.id}/openings`, { title: newTitle.trim() }),
+    onSuccess: () => {
+      setNewTitle('');
+      invalidate();
+    },
+  });
+
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        Convocatorias
+      </p>
+      {project.openings.length === 0 && (
+        <p className="text-xs text-muted-foreground">Sin convocatorias. Agrega una para recibir postulaciones.</p>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {project.openings.map((o) => (
+          <span key={o.id} className="inline-flex items-center gap-1">
+            <Badge
+              variant={o.isOpen ? 'default' : 'outline'}
+              className="cursor-pointer"
+              title={o.isOpen ? 'Clic para cerrar la convocatoria' : 'Clic para reabrirla'}
+              onClick={() => toggleOpening(o)}
+            >
+              {o.title}
+              {!o.isOpen && ' (cerrada)'}
+            </Badge>
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm(`¿Eliminar la convocatoria "${o.title}"?`)) removeOpening(o.id);
+              }}
+              className="text-muted-foreground hover:text-destructive text-xs"
+              aria-label={`Eliminar ${o.title}`}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <Input
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          placeholder="Nueva convocatoria (ej. Backend Developer)"
+          maxLength={50}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (newTitle.trim().length >= 2) addOpening();
+            }
+          }}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isAdding || newTitle.trim().length < 2}
+          onClick={() => addOpening()}
+        >
+          +
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 function ProjectCard({ project }: { project: Project }) {
@@ -49,7 +135,6 @@ function ProjectCard({ project }: { project: Project }) {
   const [customCat, setCustomCat] = useState('');
   const [budget, setBudget] = useState(project.budget?.toString() ?? '');
   const [budgetCurrency, setBudgetCurrency] = useState<'USD' | 'PEN'>(project.budgetCurrency ?? 'USD');
-  const [rolesNeeded, setRolesNeeded] = useState<string[]>(project.rolesNeeded);
 
   const toggleCategory = (cat: string) =>
     setCategories((prev) => prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]);
@@ -60,16 +145,12 @@ function ProjectCard({ project }: { project: Project }) {
     setCustomCat('');
   };
 
-  const toggleRole = (role: string) =>
-    setRolesNeeded((prev) => prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]);
-
   const { mutate: update, isPending: isUpdating, error: updateError } = useMutation({
     mutationFn: async () => {
       const { data } = await api.patch(`/projects/${project.id}`, {
         title, description, stage, categories,
         budget: budget ? parseFloat(parseFloat(budget).toFixed(2)) : undefined,
         budgetCurrency: budget ? budgetCurrency : undefined,
-        rolesNeeded,
       });
       return data;
     },
@@ -138,16 +219,6 @@ function ProjectCard({ project }: { project: Project }) {
                 <Input type="number" min={0.01} step={0.01} value={budget} onChange={(e) => setBudget(e.target.value)} className="flex-1" />
               </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label>Roles</Label>
-              <div className="flex flex-wrap gap-2">
-                {ROLES_OPTIONS.map((r) => (
-                  <Badge key={r} variant={rolesNeeded.includes(r) ? 'default' : 'outline'} className="cursor-pointer" onClick={() => toggleRole(r)}>
-                    {r}
-                  </Badge>
-                ))}
-              </div>
-            </div>
             {updateError && <p className="text-sm text-destructive">Error al guardar. Intenta de nuevo.</p>}
             <div className="flex gap-3">
               <Button type="button" variant="outline" className="flex-1" onClick={() => setEditing(false)}>Cancelar</Button>
@@ -159,12 +230,33 @@ function ProjectCard({ project }: { project: Project }) {
     );
   }
 
+  const pendingCount = project._count?.teamMembers ?? 0;
+  const interestedCount = project._count?.matches ?? 0;
+
   return (
     <Card>
       <CardContent className="pt-6 flex flex-col gap-4">
         <div className="flex items-start justify-between gap-2">
-          <h2 className="font-semibold">{project.title}</h2>
+          <Link href={`/projects/${project.id}`} className="font-semibold hover:underline">
+            {project.title}
+          </Link>
           <Badge variant="outline">{project.stage}</Badge>
+        </div>
+
+        <div className="flex flex-wrap gap-2 text-xs">
+          {pendingCount > 0 && (
+            <Link href={`/projects/${project.id}`}>
+              <Badge>{pendingCount} postulación{pendingCount > 1 ? 'es' : ''} pendiente{pendingCount > 1 ? 's' : ''}</Badge>
+            </Link>
+          )}
+          {interestedCount > 0 && (
+            <Link href="/matches?tab=incoming">
+              <Badge variant="secondary">{interestedCount} interesado{interestedCount > 1 ? 's' : ''}</Badge>
+            </Link>
+          )}
+          {project.teamMembers.length > 0 && (
+            <Badge variant="outline">Equipo: {project.teamMembers.map((t) => t.user.name?.split(' ')[0] ?? '?').join(', ')}</Badge>
+          )}
         </div>
         {project.categories.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
@@ -177,14 +269,7 @@ function ProjectCard({ project }: { project: Project }) {
             Presupuesto: {project.budgetCurrency === 'PEN' ? 'S/' : '$'}{project.budget.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         )}
-        {project.rolesNeeded.length > 0 && (
-          <div className="flex flex-col gap-1.5">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Buscan</p>
-            <div className="flex flex-wrap gap-1.5">
-              {project.rolesNeeded.map((r) => <Badge key={r} variant="outline">{r}</Badge>)}
-            </div>
-          </div>
-        )}
+        <OpeningsManager project={project} />
         <div className="flex gap-3 pt-2">
           <Button variant="outline" className="flex-1" onClick={() => setEditing(true)}>Editar</Button>
           <Button variant="destructive" className="flex-1" disabled={isDeleting}
@@ -224,7 +309,7 @@ export default function MyProjectsPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold">Mis proyectos</h1>
           <Button asChild size="sm">
-            <Link href="/startup/new">+ Nuevo proyecto</Link>
+            <Link href="/projects/new">+ Nuevo proyecto</Link>
           </Button>
         </div>
 
