@@ -104,6 +104,7 @@ export interface Project {
   categories: string[];
   budget: number | null;
   budgetCurrency: BudgetCurrency | null;
+  imageUrl?: string | null;          // ← línea nueva
   openings: RoleOpening[];
   founderId: string;
   createdAt: string;
