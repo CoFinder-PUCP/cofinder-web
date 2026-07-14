@@ -4,7 +4,7 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Nav } from '@/components/layout/nav';
+
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { api } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
@@ -123,7 +123,7 @@ function ApplicationsContent() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Nav />
+      
       <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-4">
         <h1 className="text-xl font-semibold">Solicitudes</h1>
 

@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
-import { Bell } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Bell, X } from 'lucide-react';
 import { api } from '@/lib/api';
 import { AppNotification } from '@/lib/types';
 import { useAuthStore } from '@/store/auth.store';
@@ -65,7 +66,7 @@ function timeAgo(iso: string) {
   return `hace ${Math.floor(h / 24)} d`;
 }
 
-export function NotificationBell() {
+export function NotificationBell({ variant = 'compact' }: { variant?: 'compact' | 'rail' }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
@@ -116,23 +117,79 @@ export function NotificationBell() {
   }, [open]);
 
   const unread = data?.unreadCount ?? 0;
+  const isRail = variant === 'rail';
+
+  const list = (
+    <>
+      {(data?.notifications ?? []).length === 0 && (
+        <p className="text-sm text-muted-foreground text-center py-10">Sin notificaciones</p>
+      )}
+      {(data?.notifications ?? []).map((n) => {
+        const { text, href } = describe(n);
+        return (
+          <Link
+            key={n.id}
+            href={href}
+            onClick={() => {
+              if (!n.isRead) markRead(n.id);
+              setOpen(false);
+            }}
+            className={`block px-4 py-3 text-sm border-b last:border-b-0 hover:bg-accent/50 ${
+              n.isRead ? 'text-muted-foreground' : 'font-medium'
+            }`}
+          >
+            <p className="leading-snug">{text}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(n.createdAt)}</p>
+          </Link>
+        );
+      })}
+    </>
+  );
 
   return (
     <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="relative text-muted-foreground hover:text-foreground p-1"
-        aria-label="Notificaciones"
-      >
-        <Bell className="w-4 h-4" />
-        {unread > 0 && (
-          <span className="absolute -top-1 -right-1 bg-destructive text-white text-[10px] leading-none rounded-full px-1 py-0.5 min-w-4 text-center">
-            {unread > 9 ? '9+' : unread}
+      {isRail ? (
+        /* Fila del rail: icono + etiqueta que aparece al expandir */
+        <button
+          onClick={() => setOpen((o) => !o)}
+          title="Notificaciones"
+          className={[
+            'flex items-center gap-4 h-12 w-full rounded-lg px-2.5 text-sm transition-colors',
+            open
+              ? 'bg-primary/10 text-primary font-medium'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+          ].join(' ')}
+          aria-label="Notificaciones"
+        >
+          <span className="relative shrink-0">
+            <Bell size={24} strokeWidth={open ? 2.2 : 1.8} />
+            {unread > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-destructive text-white text-[10px] leading-none rounded-full px-1 py-0.5 min-w-4 text-center">
+                {unread > 9 ? '9+' : unread}
+              </span>
+            )}
           </span>
-        )}
-      </button>
+          <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            Notificaciones
+          </span>
+        </button>
+      ) : (
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="relative text-muted-foreground hover:text-foreground p-1"
+          aria-label="Notificaciones"
+        >
+          <Bell className="w-4 h-4" />
+          {unread > 0 && (
+            <span className="absolute -top-1 -right-1 bg-destructive text-white text-[10px] leading-none rounded-full px-1 py-0.5 min-w-4 text-center">
+              {unread > 9 ? '9+' : unread}
+            </span>
+          )}
+        </button>
+      )}
 
-      {open && (
+      {/* Dropdown compacto (header móvil) */}
+      {!isRail && open && (
         <div className="absolute right-0 top-8 z-50 w-80 max-h-96 overflow-y-auto rounded-lg border bg-background shadow-lg">
           <div className="flex items-center justify-between px-3 py-2 border-b">
             <p className="text-sm font-medium">Notificaciones</p>
@@ -142,29 +199,54 @@ export function NotificationBell() {
               </button>
             )}
           </div>
-          {(data?.notifications ?? []).length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-8">Sin notificaciones</p>
-          )}
-          {(data?.notifications ?? []).map((n) => {
-            const { text, href } = describe(n);
-            return (
-              <Link
-                key={n.id}
-                href={href}
-                onClick={() => {
-                  if (!n.isRead) markRead(n.id);
-                  setOpen(false);
-                }}
-                className={`block px-3 py-2.5 text-sm border-b last:border-b-0 hover:bg-accent/50 ${
-                  n.isRead ? 'text-muted-foreground' : 'font-medium'
-                }`}
-              >
-                <p className="leading-snug">{text}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(n.createdAt)}</p>
-              </Link>
-            );
-          })}
+          {list}
         </div>
+      )}
+
+      {/* Drawer estilo Instagram (rail desktop) — se desliza sobre el contenido */}
+      {isRail && (
+        <AnimatePresence>
+          {open && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setOpen(false)}
+                className="fixed inset-y-0 right-0 left-20 z-40 bg-black/10"
+              />
+              <motion.aside
+                initial={{ x: -28, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -28, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+                className="fixed left-20 inset-y-0 z-50 flex w-[400px] max-w-[calc(100vw-5rem)] flex-col border-r bg-background shadow-2xl"
+              >
+                <div className="flex items-center justify-between px-5 py-4 border-b shrink-0">
+                  <h2 className="text-lg font-bold tracking-tight">Notificaciones</h2>
+                  <div className="flex items-center gap-4">
+                    {unread > 0 && (
+                      <button
+                        onClick={() => markAllRead()}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Marcar todas leídas
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setOpen(false)}
+                      aria-label="Cerrar"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto">{list}</div>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
       )}
     </div>
   );

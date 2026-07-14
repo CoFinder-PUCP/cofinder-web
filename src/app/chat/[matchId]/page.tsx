@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Nav } from '@/components/layout/nav';
+
 import { ChatRoom } from '@/components/chat/chat-room';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { useAuthStore } from '@/store/auth.store';
@@ -41,7 +41,7 @@ export default function ChatPage() {
 
   return (
     <main className="min-h-screen bg-background flex flex-col">
-      <Nav />
+      
       <div className="max-w-lg mx-auto w-full flex flex-col flex-1 px-4 py-4 gap-4">
         <div className="flex items-center gap-2">
           <button

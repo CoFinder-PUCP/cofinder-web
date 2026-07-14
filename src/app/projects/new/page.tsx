@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
-import { Nav } from '@/components/layout/nav';
+
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -83,7 +83,7 @@ export default function NewProjectPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Nav />
+      
       <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-6">
         <div>
           <h1 className="text-xl font-semibold">Nuevo proyecto</h1>

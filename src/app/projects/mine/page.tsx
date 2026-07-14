@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Nav } from '@/components/layout/nav';
+
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { api } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
@@ -304,7 +304,7 @@ export default function MyProjectsPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Nav />
+      
       <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold">Mis proyectos</h1>

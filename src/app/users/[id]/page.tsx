@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Nav } from '@/components/layout/nav';
+
 import { InviteButton } from '@/components/team/invite-button';
 import { ReportButton } from '@/components/report/report-button';
 import { useRequireAuth } from '@/hooks/use-require-auth';
@@ -49,7 +49,7 @@ export default function PublicProfilePage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Nav />
+      
       <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-6">
         <button
           onClick={() => router.back()}
