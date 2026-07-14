@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Nav } from '@/components/layout/nav';
+
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { useAuthStore } from '@/store/auth.store';
 import { api } from '@/lib/api';
@@ -193,7 +193,7 @@ export default function AdminPage() {
   if (!isAdmin) {
     return (
       <main className="min-h-screen bg-background">
-        <Nav />
+        
         <p className="text-muted-foreground text-sm text-center py-16">
           Esta sección es solo para administradores.
         </p>
@@ -203,7 +203,7 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Nav />
+      
       <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col gap-6">
         <div>
           <h1 className="text-xl font-semibold">Administración</h1>

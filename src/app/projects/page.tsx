@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Nav } from '@/components/layout/nav';
+
 import { ProjectCard } from '@/components/projects/project-card';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { api } from '@/lib/api';
@@ -44,7 +44,7 @@ export default function ProjectsPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Nav />
+      
       <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col gap-5">
         <div className="flex items-center justify-between gap-2">
           <div>

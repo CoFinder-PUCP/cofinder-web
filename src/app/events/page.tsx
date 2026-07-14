@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { CalendarDays, MapPin, Users } from 'lucide-react';
-import { Nav } from '@/components/layout/nav';
+
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { api } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
@@ -70,7 +70,7 @@ export default function EventsPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Nav />
+      
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-4">
         <div className="flex items-center justify-between gap-2">
           <div>

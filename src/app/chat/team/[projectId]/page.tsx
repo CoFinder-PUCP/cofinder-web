@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Nav } from '@/components/layout/nav';
+
 import { ChatRoom } from '@/components/chat/chat-room';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { api } from '@/lib/api';
@@ -45,7 +45,7 @@ export default function TeamChatPage() {
   if (isError || !chat) {
     return (
       <main className="min-h-screen bg-background">
-        <Nav />
+        
         <div className="max-w-lg mx-auto px-4 py-16 text-center flex flex-col gap-3 items-center">
           <p className="text-muted-foreground text-sm">
             Este chat es solo para el equipo del proyecto.
@@ -62,7 +62,7 @@ export default function TeamChatPage() {
 
   return (
     <main className="min-h-screen bg-background flex flex-col">
-      <Nav />
+      
       <div className="max-w-lg mx-auto w-full flex flex-col flex-1 px-4 py-4 gap-4">
         <div className="flex items-center gap-2">
           <button

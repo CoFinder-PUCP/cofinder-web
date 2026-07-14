@@ -99,7 +99,12 @@ export function ProfileView() {
 
       {user.projects?.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium">Mis proyectos</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">Mis proyectos</p>
+            <Link href="/projects/mine" className="text-xs text-primary hover:underline">
+              Gestionar
+            </Link>
+          </div>
           {user.projects.map((p: { id: string; title: string; stage: string }) => (
             <Link key={p.id} href={`/projects/${p.id}`}>
               <Card className="hover:bg-accent/50 transition-colors">
@@ -134,9 +139,14 @@ export function ProfileView() {
         </div>
       )}
 
-      <Button asChild variant="outline" className="w-full">
-        <Link href="/profile/edit">Editar perfil</Link>
-      </Button>
+      <div className="flex gap-2">
+        <Button asChild variant="outline" className="flex-1">
+          <Link href="/profile/edit">Editar perfil</Link>
+        </Button>
+        <Button asChild variant="outline" className="flex-1">
+          <Link href="/projects/mine">Mis proyectos</Link>
+        </Button>
+      </div>
     </div>
   );
 }

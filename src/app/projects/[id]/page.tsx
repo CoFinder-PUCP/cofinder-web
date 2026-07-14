@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Nav } from '@/components/layout/nav';
+
 import { ReportButton } from '@/components/report/report-button';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { useAuthStore } from '@/store/auth.store';
@@ -274,7 +274,7 @@ export default function ProjectDetailPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Nav />
+      
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-5">
         <button
           onClick={() => router.back()}
