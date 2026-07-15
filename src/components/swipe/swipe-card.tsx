@@ -5,6 +5,7 @@ import { motion, useMotionValue, useTransform, animate, AnimatePresence } from '
 import Link from 'next/link';
 import { ChevronDown, X, Heart, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { mediaUrl, thumbUrl } from '@/lib/media';
 import { STAGE_LABELS } from '@/lib/types';
 import type { Project } from '@/lib/types';
 
@@ -97,6 +98,8 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
 
   const openOpenings = project.openings.filter((o) => o.isOpen);
   const categoryTags = project.categories.slice(0, 3);
+  // La portada ya llena la card; en la galería solo van las demás.
+  const gallery = (project.media ?? []).filter((m) => m.key !== project.coverKey);
 
   return (
     <motion.div
@@ -113,16 +116,16 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
       <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-xl bg-card border border-border">
 
         {/* Imagen o placeholder */}
-        {(project as any).imageUrl ? (
+        {mediaUrl(project.coverKey) ? (
           <img
-            src={(project as any).imageUrl}
+            src={mediaUrl(project.coverKey)!}
             alt={project.title}
             className="w-full h-full object-cover"
             draggable={false}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-muted to-muted/40 flex items-center justify-center">
-            <span className="text-6xl opacity-20">R</span>
+            <span className="text-6xl opacity-20">{project.title.charAt(0).toUpperCase()}</span>
           </div>
         )}
 
@@ -256,22 +259,19 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
                   ))}
                 </div>
 
-                {(project as any).images?.length > 0 && (
+                {gallery.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Imágenes</p>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Fotos</p>
                     <div className="grid grid-cols-2 gap-2">
-                      {(project as any).images.map((url: string, i: number) => (
-                        <img key={i} src={url} alt={`imagen ${i + 1}`} className="rounded-xl object-cover aspect-video w-full" />
+                      {gallery.map((m) => (
+                        <img
+                          key={m.id}
+                          src={thumbUrl(m.key) ?? ''}
+                          alt=""
+                          loading="lazy"
+                          className="rounded-xl object-cover aspect-video w-full"
+                        />
                       ))}
-                    </div>
-                  </div>
-                )}
-
-                {(project as any).videoUrl && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Video</p>
-                    <div className="rounded-xl overflow-hidden aspect-video">
-                      <iframe src={(project as any).videoUrl.replace('watch?v=', 'embed/')} className="w-full h-full" allowFullScreen />
                     </div>
                   </div>
                 )}

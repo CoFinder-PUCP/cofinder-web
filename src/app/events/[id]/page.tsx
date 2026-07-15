@@ -94,7 +94,7 @@ export default function EventDetailPage() {
   const router = useRouter();
   const { hasHydrated, isAuthenticated } = useRequireAuth();
   const currentUserId = useAuthStore((s) => s.user?.id);
-  const role = useAuthStore((s) => s.user?.role);
+  const isAdmin = useAuthStore((s) => s.user?.isAdmin);
   const queryClient = useQueryClient();
 
   const { data: event, isLoading } = useQuery<AppEvent>({
@@ -125,7 +125,7 @@ export default function EventDetailPage() {
   }
 
   const isOrganizer = event.organizerId === currentUserId;
-  const canModerate = isOrganizer || role === 'ADMIN';
+  const canModerate = isOrganizer || !!isAdmin;
   const isPast = new Date(event.endsAt ?? event.startsAt) < new Date();
 
   return (

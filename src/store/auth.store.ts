@@ -6,7 +6,9 @@ interface User {
   email: string;
   name: string | null;
   avatar: string | null;
-  role: 'STUDENT' | 'ALUMNI' | 'ADMIN';
+  role: 'STUDENT' | 'ALUMNI';
+  /** Solo en tu propia sesión: el API nunca lo expone de otras personas. */
+  isAdmin: boolean;
   bio: string | null;
   career: string | null;
   faculty: string | null;
