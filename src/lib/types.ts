@@ -1,6 +1,8 @@
 // Tipos compartidos de la API. Mantener en sync con cofinder-api (prisma/schema.prisma).
 
-export type UserRole = 'STUDENT' | 'ALUMNI' | 'ADMIN';
+/** Identidad, no permisos. Quién modera no se publica: ver isAdmin en la
+ *  sesión propia (auth.store). */
+export type UserRole = 'STUDENT' | 'ALUMNI';
 export type ProjectStage = 'IDEA' | 'PROTOTYPE' | 'MVP' | 'REVENUE';
 export type BudgetCurrency = 'USD' | 'PEN';
 export type MembershipStatus = 'PENDING' | 'INVITED' | 'ACTIVE' | 'REJECTED' | 'LEFT';
@@ -87,6 +89,19 @@ export interface PublicProfile {
   canEndorse: boolean;
 }
 
+/**
+ * Imagen de la galería de un proyecto o adjunta a un post. La portada NO va
+ * acá: es `Project.coverKey`. Guardamos la key; la URL la arma mediaUrl().
+ */
+export interface MediaAsset {
+  id: string;
+  key: string;
+  type: 'IMAGE' | 'VIDEO';
+  width: number | null;
+  height: number | null;
+  order: number;
+}
+
 export interface RoleOpening {
   id: string;
   title: string;
@@ -104,7 +119,10 @@ export interface Project {
   categories: string[];
   budget: number | null;
   budgetCurrency: BudgetCurrency | null;
-  imageUrl?: string | null;          // ← línea nueva
+  /** Key del objeto en el storage. La URL se arma con mediaUrl()/thumbUrl(). */
+  coverKey?: string | null;
+  /** Galería: fotos extra que se ven en el detalle y al expandir la card. */
+  media?: MediaAsset[];
   openings: RoleOpening[];
   founderId: string;
   createdAt: string;
@@ -237,6 +255,7 @@ export interface Post {
   id: string;
   content: string;
   createdAt: string;
+  media?: MediaAsset[];
   author: UserSummary;
   project: { id: string; title: string; stage: ProjectStage } | null;
   likedByMe: boolean;

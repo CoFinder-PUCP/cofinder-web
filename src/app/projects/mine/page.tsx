@@ -12,6 +12,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { ImageUpload } from '@/components/ui/image-upload';
+import { MultiImageUpload } from '@/components/ui/multi-image-upload';
+import { thumbUrl } from '@/lib/media';
+import type { Project, RoleOpening } from '@/lib/types';
+
+const MAX_GALLERY = 6;
 
 const STAGES = ['IDEA', 'PROTOTYPE', 'MVP', 'REVENUE'] as const;
 
@@ -21,34 +27,37 @@ const PRESET_CATEGORIES = [
   'Real Estate', 'Agro', 'Seguridad', 'IoT', 'Entretenimiento',
 ];
 
-interface Opening {
-  id: string;
-  title: string;
-  description: string | null;
-  isOpen: boolean;
-}
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  stage: string;
-  categories: string[];
-  budget: number | null;
-  budgetCurrency: 'USD' | 'PEN' | null;
-  openings: Opening[];
+/**
+ * GET /projects/mine devuelve una forma distinta de GET /projects: no trae
+ * `founder` (eres tú) y sus teamMembers siempre traen `user`. Los campos que sí
+ * comparte se derivan de Project para que no se desincronicen — que fue lo que
+ * pasó con coverKey, que hubo que agregar en dos sitios.
+ */
+type MyProject = Pick<
+  Project,
+  | 'id'
+  | 'title'
+  | 'description'
+  | 'stage'
+  | 'categories'
+  | 'budget'
+  | 'budgetCurrency'
+  | 'coverKey'
+  | 'media'
+  | 'openings'
+  | '_count'
+> & {
   teamMembers: { id: string; role: string; user: { id: string; name: string | null } }[];
-  _count?: { teamMembers: number; matches: number };
-}
+};
 
 /** Gestión de convocatorias: abrir/cerrar, eliminar y agregar. */
-function OpeningsManager({ project }: { project: Project }) {
+function OpeningsManager({ project }: { project: MyProject }) {
   const queryClient = useQueryClient();
   const [newTitle, setNewTitle] = useState('');
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['my-projects'] });
 
   const { mutate: toggleOpening } = useMutation({
-    mutationFn: (o: Opening) => api.patch(`/projects/openings/${o.id}`, { isOpen: !o.isOpen }),
+    mutationFn: (o: RoleOpening) => api.patch(`/projects/openings/${o.id}`, { isOpen: !o.isOpen }),
     onSuccess: invalidate,
   });
 
@@ -124,7 +133,7 @@ function OpeningsManager({ project }: { project: Project }) {
   );
 }
 
-function ProjectCard({ project }: { project: Project }) {
+function ProjectCard({ project }: { project: MyProject }) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
 
@@ -135,6 +144,11 @@ function ProjectCard({ project }: { project: Project }) {
   const [customCat, setCustomCat] = useState('');
   const [budget, setBudget] = useState(project.budget?.toString() ?? '');
   const [budgetCurrency, setBudgetCurrency] = useState<'USD' | 'PEN'>(project.budgetCurrency ?? 'USD');
+  const [coverKey, setCoverKey] = useState<string | null>(project.coverKey ?? null);
+  const [mediaKeys, setMediaKeys] = useState<string[]>(
+    // La portada también es un MediaAsset del proyecto, pero se edita aparte.
+    (project.media ?? []).map((m) => m.key).filter((k) => k !== project.coverKey),
+  );
 
   const toggleCategory = (cat: string) =>
     setCategories((prev) => prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]);
@@ -151,6 +165,9 @@ function ProjectCard({ project }: { project: Project }) {
         title, description, stage, categories,
         budget: budget ? parseFloat(parseFloat(budget).toFixed(2)) : undefined,
         budgetCurrency: budget ? budgetCurrency : undefined,
+        // null borra la portada; el backend limpia la anterior del bucket.
+        coverKey,
+        mediaKeys,
       });
       return data;
     },
@@ -170,6 +187,25 @@ function ProjectCard({ project }: { project: Project }) {
       <Card>
         <CardContent className="pt-6">
           <form className="flex flex-col gap-4" onSubmit={(e) => { e.preventDefault(); update(); }}>
+            <div className="flex flex-col gap-1.5">
+              <Label>Foto principal</Label>
+              <ImageUpload
+                value={coverKey}
+                onChange={setCoverKey}
+                target="project"
+                aspect="aspect-[4/5]"
+                className="max-w-40"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>Más fotos</Label>
+              <MultiImageUpload
+                value={mediaKeys}
+                onChange={setMediaKeys}
+                target="project"
+                max={MAX_GALLERY}
+              />
+            </div>
             <div className="flex flex-col gap-1.5">
               <Label>Nombre</Label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -233,8 +269,13 @@ function ProjectCard({ project }: { project: Project }) {
   const pendingCount = project._count?.teamMembers ?? 0;
   const interestedCount = project._count?.matches ?? 0;
 
+  const cover = thumbUrl(project.coverKey);
+
   return (
     <Card>
+      {cover && (
+        <img src={cover} alt="" className="aspect-[16/9] w-full object-cover" loading="lazy" />
+      )}
       <CardContent className="pt-6 flex flex-col gap-4">
         <div className="flex items-start justify-between gap-2">
           <Link href={`/projects/${project.id}`} className="font-semibold hover:underline">
@@ -285,7 +326,7 @@ function ProjectCard({ project }: { project: Project }) {
 export default function MyProjectsPage() {
   const { hasHydrated, isAuthenticated } = useRequireAuth();
 
-  const { data: projects = [], isLoading } = useQuery<Project[]>({
+  const { data: projects = [], isLoading } = useQuery<MyProject[]>({
     queryKey: ['my-projects'],
     queryFn: async () => {
       const { data } = await api.get('/projects/mine');

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { thumbUrl } from '@/lib/media';
 import { Project, STAGE_LABELS } from '@/lib/types';
 
 export function ProjectCard({ project }: { project: Project }) {
@@ -11,9 +12,17 @@ export function ProjectCard({ project }: { project: Project }) {
     ? project.founder.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
     : '?';
 
+  // Miniatura (400px, ~12 KB), no la imagen completa: en una grilla de 20
+  // proyectos la diferencia se nota, sobre todo en datos móviles.
+  const cover = thumbUrl(project.coverKey);
+
   return (
     <Link href={`/projects/${project.id}`} className="block h-full">
       <Card className="h-full hover:bg-accent/50 transition-colors cursor-pointer">
+        {/* Card ya trae el estilo para una imagen como primer hijo */}
+        {cover && (
+          <img src={cover} alt="" className="aspect-[16/9] w-full object-cover" loading="lazy" />
+        )}
         <CardContent className="pt-5 pb-5 flex flex-col gap-3 h-full">
           <div className="flex items-start justify-between gap-2">
             <h2 className="font-semibold leading-tight">{project.title}</h2>
