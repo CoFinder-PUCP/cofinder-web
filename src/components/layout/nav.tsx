@@ -72,7 +72,7 @@ export function Nav() {
   const router    = useRouter();
   const pathname  = usePathname();
   const clearAuth = useAuthStore((s) => s.clearAuth);
-  const role      = useAuthStore((s) => s.user?.role);
+  const isAdmin   = useAuthStore((s) => s.user?.isAdmin);
 
   const isActive = (matches: readonly string[]) =>
     matches.some((m) => pathname === m || pathname.startsWith(`${m}/`));
@@ -102,7 +102,7 @@ export function Nav() {
 
       {/* Footer del rail */}
       <div className="flex flex-col gap-1 pt-3 border-t">
-        {role === 'ADMIN' && (
+        {isAdmin && (
           <RailLink {...ADMIN_LINK} active={isActive(ADMIN_LINK.matches)} />
         )}
         <button

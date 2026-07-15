@@ -20,7 +20,17 @@ export default function SwipePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [match, setMatch] = useState<{ title: string; matchId?: string; chatId?: string } | null>(null);
   const [infoOpen, setInfoOpen] = useState(false);
-  const topCardRef = useRef<SwipeCardHandle>(null);
+
+  /**
+   * Un handle por proyecto, no un único ref para "la de arriba".
+   *
+   * Con un solo ref compartido, la card que sale sigue montada mientras dura su
+   * animación (AnimatePresence conserva el elemento viejo, con su ref), así que
+   * al desmontarse React pone el ref en null y se lleva por delante el de la
+   * card que acaba de quedar arriba: los botones dejaban de responder hasta el
+   * siguiente render. Con un Map cada card solo toca su propia entrada.
+   */
+  const cardHandles = useRef(new Map<string, SwipeCardHandle>());
 
   const { data: feed = [], isLoading, refetch } = useQuery<Project[]>({
     queryKey: ['swipe-feed'],
@@ -63,7 +73,7 @@ export default function SwipePage() {
   const handleSwipeButton = (direction: 'LEFT' | 'RIGHT') => {
     // Dispara la misma animación de la card; el mutate corre al terminar (onSwipe)
     if (!isPending && currentProject) {
-      topCardRef.current?.swipe(direction);
+      cardHandles.current.get(currentProject.id)?.swipe(direction);
     }
   };
 
@@ -97,7 +107,12 @@ export default function SwipePage() {
                   return (
                     <SwipeCard
                       key={project.id}
-                      ref={isTop ? topCardRef : undefined}
+                      ref={(handle) => {
+                        // Cada card se registra bajo su propio id y solo borra
+                        // esa entrada al desmontarse: nunca pisa a otra.
+                        if (handle) cardHandles.current.set(project.id, handle);
+                        else cardHandles.current.delete(project.id);
+                      }}
                       project={project}
                       isTop={isTop}
                       onSwipe={(direction) => {
@@ -206,32 +221,6 @@ export default function SwipePage() {
                   </p>
                   <p className="text-sm leading-relaxed text-foreground/80">{currentProject.description}</p>
                 </div>
-
-                {/* Imágenes */}
-                {(currentProject as any).images?.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Imágenes</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {(currentProject as any).images.map((url: string, i: number) => (
-                        <img key={i} src={url} alt={`imagen ${i + 1}`} className="rounded-xl object-cover aspect-video w-full" />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Video */}
-                {(currentProject as any).videoUrl && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Video</p>
-                    <div className="rounded-xl overflow-hidden aspect-video">
-                      <iframe
-                        src={(currentProject as any).videoUrl.replace('watch?v=', 'embed/')}
-                        className="w-full h-full"
-                        allowFullScreen
-                      />
-                    </div>
-                  </div>
-                )}
 
                 {/* Presupuesto */}
                 {currentProject.budget != null && (

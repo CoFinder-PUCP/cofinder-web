@@ -16,6 +16,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { mediaUrl, thumbUrl } from '@/lib/media';
 import { formatBudget, Match, Membership, Project, STAGE_LABELS } from '@/lib/types';
 
 function initials(name: string | null | undefined) {
@@ -271,6 +272,8 @@ export default function ProjectDetailPage() {
   const isFounder = project.founderId === currentUserId;
   const myMembership = memberships.find((m) => m.projectId === projectId);
   const myMatch = matches.find((m) => m.projectId === projectId);
+  // La portada ya se muestra arriba a lo ancho; no repetirla en la galería.
+  const gallery = (project.media ?? []).filter((m) => m.key !== project.coverKey);
 
   return (
     <main className="min-h-screen bg-background">
@@ -284,6 +287,14 @@ export default function ProjectDetailPage() {
         </button>
 
         <Card>
+          {/* Acá sí la imagen completa (no la miniatura): es la vista grande. */}
+          {mediaUrl(project.coverKey) && (
+            <img
+              src={mediaUrl(project.coverKey)!}
+              alt={project.title}
+              className="aspect-[16/9] w-full object-cover"
+            />
+          )}
           <CardContent className="pt-6 flex flex-col gap-4">
             <div className="flex items-start justify-between gap-2">
               <h1 className="text-xl font-semibold">{project.title}</h1>
@@ -294,6 +305,27 @@ export default function ProjectDetailPage() {
               <div className="flex flex-wrap gap-1.5">
                 {project.categories.map((c) => (
                   <Badge key={c} variant="secondary">{c}</Badge>
+                ))}
+              </div>
+            )}
+
+            {gallery.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {gallery.map((m) => (
+                  <a
+                    key={m.id}
+                    href={mediaUrl(m.key) ?? undefined}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="overflow-hidden rounded-lg border border-border transition-opacity hover:opacity-85"
+                  >
+                    <img
+                      src={thumbUrl(m.key) ?? ''}
+                      alt=""
+                      loading="lazy"
+                      className="aspect-square w-full object-cover"
+                    />
+                  </a>
                 ))}
               </div>
             )}

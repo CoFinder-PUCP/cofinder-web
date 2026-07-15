@@ -39,6 +39,7 @@ interface AdminUser {
   email: string;
   name: string | null;
   role: string;
+  isAdmin: boolean;
   career: string | null;
   createdAt: string;
   _count: { projects: number; posts: number; sentMessages: number };
@@ -120,13 +121,13 @@ function StatTile({ label, value, sub }: { label: string; value: number; sub?: s
 
 export default function AdminPage() {
   const { hasHydrated, isAuthenticated } = useRequireAuth();
-  const role = useAuthStore((s) => s.user?.role);
+  const isAdmin = useAuthStore((s) => s.user?.isAdmin);
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<'reports' | 'projects' | 'posts' | 'users'>('reports');
   const [search, setSearch] = useState('');
   const [reportStatus, setReportStatus] = useState<'OPEN' | 'RESOLVED' | 'DISMISSED'>('OPEN');
 
-  const isAdmin = role === 'ADMIN';
+  
 
   const { data: stats } = useQuery<AdminStats>({
     queryKey: ['admin-stats'],
@@ -383,7 +384,7 @@ export default function AdminPage() {
                     {u._count.posts} posts · {u._count.sentMessages} mensajes
                   </p>
                 </div>
-                <Badge variant={u.role === 'ADMIN' ? 'default' : 'outline'}>{u.role}</Badge>
+                <Badge variant={u.isAdmin ? 'default' : 'outline'}>{u.isAdmin ? 'ADMIN' : u.role}</Badge>
               </CardContent>
             </Card>
           ))}

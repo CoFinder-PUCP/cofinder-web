@@ -11,6 +11,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { ImageUpload } from '@/components/ui/image-upload';
+import { MultiImageUpload } from '@/components/ui/multi-image-upload';
+
+const MAX_GALLERY = 6;
 
 const STAGES = ['IDEA', 'PROTOTYPE', 'MVP', 'REVENUE'] as const;
 
@@ -38,6 +42,8 @@ export default function NewProjectPage() {
   const [budget, setBudget] = useState('');
   const [budgetCurrency, setBudgetCurrency] = useState<'USD' | 'PEN'>('USD');
   const [rolesNeeded, setRolesNeeded] = useState<string[]>([]);
+  const [coverKey, setCoverKey] = useState<string | null>(null);
+  const [mediaKeys, setMediaKeys] = useState<string[]>([]);
 
   const toggleCategory = (cat: string) =>
     setCategories((prev) =>
@@ -66,6 +72,8 @@ export default function NewProjectPage() {
         categories,
         budget: budget ? parseFloat(parseFloat(budget).toFixed(2)) : undefined,
         budgetCurrency: budget ? budgetCurrency : undefined,
+        coverKey: coverKey ?? undefined,
+        mediaKeys,
         openings: rolesNeeded.map((title) => ({ title })),
       });
       return data;
@@ -94,6 +102,33 @@ export default function NewProjectPage() {
           className="flex flex-col gap-5"
           onSubmit={(e) => { e.preventDefault(); mutate(); }}
         >
+          <div className="flex flex-col gap-1.5">
+            <Label>Foto principal</Label>
+            <p className="text-xs text-muted-foreground -mt-1">
+              Es la que se ve en la card cuando otros hacen swipe.
+            </p>
+            <ImageUpload
+              value={coverKey}
+              onChange={setCoverKey}
+              target="project"
+              aspect="aspect-[4/5]"
+              className="max-w-56"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label>Más fotos (opcional)</Label>
+            <p className="text-xs text-muted-foreground -mt-1">
+              Se ven en el detalle del proyecto. Hasta {MAX_GALLERY}.
+            </p>
+            <MultiImageUpload
+              value={mediaKeys}
+              onChange={setMediaKeys}
+              target="project"
+              max={MAX_GALLERY}
+            />
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="title">Nombre *</Label>
             <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required minLength={3} maxLength={100} />

@@ -20,7 +20,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { MultiImageUpload } from '@/components/ui/multi-image-upload';
+import { mediaUrl, thumbUrl } from '@/lib/media';
+import { cn } from '@/lib/utils';
 import { Post, PostComment, timeAgo } from '@/lib/types';
+
+const MAX_POST_MEDIA = 4;
 
 function initials(name: string | null | undefined) {
   return name ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() : '?';
@@ -30,6 +35,7 @@ function Composer() {
   const queryClient = useQueryClient();
   const [content, setContent] = useState('');
   const [projectId, setProjectId] = useState<string | null>(null);
+  const [mediaKeys, setMediaKeys] = useState<string[]>([]);
 
   const { data: myProjects = [] } = useQuery<{ id: string; title: string }[]>({
     queryKey: ['my-projects'],
@@ -44,12 +50,14 @@ function Composer() {
       const { data } = await api.post('/posts', {
         content: content.trim(),
         projectId: projectId ?? undefined,
+        mediaKeys,
       });
       return data;
     },
     onSuccess: () => {
       setContent('');
       setProjectId(null);
+      setMediaKeys([]);
       queryClient.invalidateQueries({ queryKey: ['feed'] });
     },
   });
@@ -63,6 +71,12 @@ function Composer() {
           rows={3}
           maxLength={1000}
           placeholder="Comparte un avance, una idea o una convocatoria..."
+        />
+        <MultiImageUpload
+          value={mediaKeys}
+          onChange={setMediaKeys}
+          target="post"
+          max={MAX_POST_MEDIA}
         />
         {myProjects.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
@@ -82,7 +96,7 @@ function Composer() {
         <div className="flex justify-end">
           <Button
             size="sm"
-            disabled={isPending || content.trim().length === 0}
+            disabled={isPending || (content.trim().length === 0 && mediaKeys.length === 0)}
             onClick={() => publish()}
           >
             {isPending ? 'Publicando...' : 'Publicar'}
@@ -230,7 +244,39 @@ function PostCard({ post }: { post: Post }) {
           )}
         </div>
 
-        <p className="text-sm leading-relaxed whitespace-pre-line">{post.content}</p>
+        {post.content.trim().length > 0 && (
+          <p className="text-sm leading-relaxed whitespace-pre-line">{post.content}</p>
+        )}
+
+        {(post.media?.length ?? 0) > 0 && (
+          <div
+            className={cn(
+              'grid gap-1.5',
+              post.media!.length === 1 ? 'grid-cols-1' : 'grid-cols-2',
+            )}
+          >
+            {post.media!.map((m) => (
+              <a
+                key={m.id}
+                href={mediaUrl(m.key) ?? undefined}
+                target="_blank"
+                rel="noreferrer"
+                className="overflow-hidden rounded-lg border border-border transition-opacity hover:opacity-90"
+              >
+                <img
+                  src={thumbUrl(m.key) ?? ''}
+                  alt=""
+                  loading="lazy"
+                  className={cn(
+                    'w-full object-cover',
+                    // Una sola foto se ve más alta; varias, en cuadrícula pareja.
+                    post.media!.length === 1 ? 'max-h-96' : 'aspect-square',
+                  )}
+                />
+              </a>
+            ))}
+          </div>
+        )}
 
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <button
