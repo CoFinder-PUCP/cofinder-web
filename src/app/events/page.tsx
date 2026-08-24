@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarDays, MapPin, Users } from 'lucide-react';
+import { CalendarDays, Check, MapPin, Users } from 'lucide-react';
 
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { api } from '@/lib/api';
@@ -39,7 +39,7 @@ function EventCard({ event }: { event: AppEvent }) {
               <Users className="w-3.5 h-3.5" />
               {event._count?.registrations ?? 0} inscritos
             </span>
-            {event.registeredByMe && <Badge className="text-xs">Inscrito ✓</Badge>}
+            {event.registeredByMe && <Badge className="text-xs"><Check />Inscrito</Badge>}
           </div>
           <p className="text-xs text-muted-foreground">
             Organiza: {event.organizer.name ?? '—'}

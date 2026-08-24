@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { CalendarDays, ExternalLink, MapPin } from 'lucide-react';
+import { CalendarDays, Check, ExternalLink, MapPin } from 'lucide-react';
 
 import { ReportButton } from '@/components/report/report-button';
 import { useRequireAuth } from '@/hooks/use-require-auth';
@@ -191,7 +191,7 @@ export default function EventDetailPage() {
 
             {event.registeredByMe && !isPast && (
               <div className="flex items-center justify-between">
-                <Badge>Estás inscrito ✓</Badge>
+                <Badge><Check />Estás inscrito</Badge>
                 <Button variant="outline" size="sm" onClick={() => unregister()}>
                   Cancelar inscripción
                 </Button>

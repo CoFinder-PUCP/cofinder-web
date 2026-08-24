@@ -149,7 +149,7 @@ export const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function Sw
         {/* Info inferior */}
         <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-1.5">
 
-          {/* Botones X/♥ — fila propia, solo móvil */}
+          {/* Botones pasar / me interesa — fila propia, solo móvil */}
           {isTop && !isExpanded && (
             <div className="flex justify-end gap-2 md:hidden">
               <button

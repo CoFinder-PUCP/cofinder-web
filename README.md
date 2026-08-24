@@ -85,7 +85,7 @@ src/
 │       └── team/[projectId]/page.tsx  # Chat grupal del equipo
 ├── components/
 │   ├── auth/login-button.tsx       # Botón "Continuar con Google"
-│   ├── chat/chat-room.tsx          # Sala reutilizable: typing, ✓✓ visto, socket
+│   ├── chat/chat-room.tsx          # Sala reutilizable: typing, visto, socket
 │   ├── layout/
 │   │   ├── nav.tsx                 # Navegación + búsqueda global + campana
 │   │   ├── global-search.tsx       # GET /search con debounce y dropdown
@@ -154,7 +154,7 @@ El token se persiste en `localStorage` bajo la key `auth-storage` (Zustand persi
 | US-18 | Chat grupal del equipo del proyecto | `/chat/team/[projectId]` |
 | US-19 | Búsqueda global de proyectos y personas | nav |
 | US-20 | Feed ordenado por afinidad ("Para ti") | `/projects`, `/swipe` |
-| US-21 | Typing indicator y confirmación de lectura (✓✓) | chats |
+| US-21 | Typing indicator y confirmación de lectura | chats |
 | US-22 | Preferencias de email (avisos + resumen semanal) | `/profile/edit` |
 | US-23 | Panel de administración: métricas y moderación | `/admin` (solo ADMIN) |
 | US-24 | Landing con vitrina pública de proyectos y eventos | `/` (sin login) |

@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
-import { Users, ExternalLink, X, Info } from 'lucide-react';
+import { Users, ExternalLink, X, Heart, Info } from 'lucide-react';
 
 import { SwipeCard, type SwipeCardHandle } from '@/components/swipe/swipe-card';
 import { useRequireAuth } from '@/hooks/use-require-auth';
@@ -89,7 +89,6 @@ export default function SwipePage() {
 
         {isEmpty && (
           <div className="text-center flex flex-col gap-4 items-center">
-            <span className="text-5xl">🎉</span>
             <p className="text-muted-foreground text-sm">Has visto todos los proyectos por ahora.</p>
             <Button variant="outline" onClick={() => { setCurrentIndex(0); refetch(); }}>
               Ver de nuevo
@@ -132,7 +131,8 @@ export default function SwipePage() {
                 disabled={isPending}
                 onClick={() => handleSwipeButton('LEFT')}
               >
-                ✕ Pasar
+                <X />
+                Pasar
               </Button>
               <button
                 onClick={() => setInfoOpen((v) => !v)}
@@ -146,7 +146,8 @@ export default function SwipePage() {
                 disabled={isPending}
                 onClick={() => handleSwipeButton('RIGHT')}
               >
-                ♥ Me interesa
+                <Heart />
+                Me interesa
               </Button>
             </div>
           </>
@@ -295,7 +296,6 @@ export default function SwipePage() {
               >
                 <X className="w-5 h-5" />
               </button>
-              <span className="text-6xl">🎉</span>
               <div>
                 <h2 className="text-2xl font-extrabold tracking-tight">¡Es un match!</h2>
                 <p className="text-sm text-muted-foreground mt-1">

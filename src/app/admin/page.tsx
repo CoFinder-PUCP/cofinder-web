@@ -270,7 +270,7 @@ export default function AdminPage() {
 
         {tab === 'reports' && reports.length === 0 && (
           <p className="text-muted-foreground text-sm py-8 text-center">
-            No hay reportes {reportStatus === 'OPEN' ? 'abiertos' : 'en este estado'}. 🎉
+            No hay reportes {reportStatus === 'OPEN' ? 'abiertos' : 'en este estado'}.
           </p>
         )}
 
@@ -354,7 +354,8 @@ export default function AdminPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm line-clamp-2">{p.content}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {p.author.name ?? p.author.email} · ♥ {p._count.likes} · 💬 {p._count.comments} ·{' '}
+                    {p.author.name ?? p.author.email} · {p._count.likes} me gusta ·{' '}
+                    {p._count.comments} comentarios ·{' '}
                     {timeAgo(p.createdAt)}
                   </p>
                 </div>

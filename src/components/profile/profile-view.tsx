@@ -58,9 +58,9 @@ export function ProfileView() {
 
           {user.badges?.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {user.badges.map((b: { id: string; emoji: string; label: string; description: string }) => (
+              {user.badges.map((b: { id: string; label: string; description: string }) => (
                 <Badge key={b.id} variant="outline" title={b.description}>
-                  {b.emoji} {b.label}
+                  {b.label}
                 </Badge>
               ))}
             </div>
@@ -78,7 +78,7 @@ export function ProfileView() {
               return (
                 <Badge key={s} variant="secondary" title={count ? `${count} endorsement(s) de tus compañeros` : undefined}>
                   {s}
-                  {count ? ` · ${count} ⭐` : ''}
+                  {count ? ` · ${count}` : ''}
                 </Badge>
               );
             })}

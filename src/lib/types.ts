@@ -25,7 +25,6 @@ export type ReportTargetType = 'PROJECT' | 'POST' | 'COMMENT' | 'USER' | 'EVENT'
 
 export interface Badge {
   id: string;
-  emoji: string;
   label: string;
   description: string;
 }
