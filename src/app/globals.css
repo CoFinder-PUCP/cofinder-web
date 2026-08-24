@@ -49,6 +49,14 @@
 }
 
 :root {
+  /* El ave siempre tiene la cabeza oscura y el cuerpo claro: eso es identidad
+     del animal, no decoración, así que NO se invierte con el tema. Lo que
+     cambia entre light y dark es de qué token sale cada uno. El contorno va
+     aparte (currentColor) porque su trabajo es contrastar con la página: en
+     light delinea el vientre claro, en dark delinea la cabeza oscura. */
+  --logo-head: var(--foreground);
+  --logo-belly: var(--background);
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -84,6 +92,9 @@
 }
 
 .dark {
+  --logo-head: var(--background);
+  --logo-belly: var(--foreground);
+
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
