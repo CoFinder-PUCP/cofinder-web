@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { LoginButton } from '@/components/auth/login-button';
+import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { CofinderMark } from '@/components/brand/cofinder-mark';
 import { useAuthStore } from '@/store/auth.store';
 import { api } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
@@ -58,10 +60,14 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-background px-4 py-16">
+    <main className="relative min-h-screen bg-background px-4 py-16">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-3xl mx-auto flex flex-col items-center gap-10">
         <div className="flex flex-col items-center gap-6 text-center">
           <div className="flex flex-col items-center gap-2">
+            <CofinderMark className="h-16 w-auto text-foreground" />
             <h1 className="text-3xl font-semibold tracking-tight">CoFinder</h1>
             <p className="text-muted-foreground text-sm max-w-md">
               Publica tu idea, encuentra equipo y únete a proyectos de la comunidad PUCP
