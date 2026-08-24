@@ -60,7 +60,7 @@ export function InviteButton({ targetUserId, targetName }: { targetUserId: strin
   if (targetUserId === currentUserId) return null;
 
   if (sent) {
-    return <Badge>Invitación enviada{targetName ? ` a ${targetName.split(' ')[0]}` : ''} ✓</Badge>;
+    return <Badge>Invitación enviada{targetName ? ` a ${targetName.split(' ')[0]}` : ''}</Badge>;
   }
 
   if (!open) {

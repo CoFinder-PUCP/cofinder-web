@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { io, Socket } from 'socket.io-client';
+import { CheckCheck } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,7 @@ interface ChatRoomProps {
 
 /**
  * Sala de chat reutilizable (1:1 y grupal): historial REST + tiempo real por
- * socket, indicador de escritura y confirmación de lectura (✓✓).
+ * socket, indicador de escritura y confirmación de lectura.
  */
 export function ChatRoom({ chatId, group = false }: ChatRoomProps) {
   const token = useAuthStore((s) => s.token);
@@ -142,7 +143,10 @@ export function ChatRoom({ chatId, group = false }: ChatRoomProps) {
                 {msg.content}
               </div>
               {isMe && msg.id === lastOwnMessage?.id && lastOwnSeen && (
-                <p className="text-[10px] text-muted-foreground">✓✓ Visto</p>
+                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <CheckCheck className="w-3 h-3" />
+                  Visto
+                </p>
               )}
             </div>
           );

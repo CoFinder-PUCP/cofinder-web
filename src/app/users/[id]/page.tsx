@@ -93,7 +93,7 @@ export default function PublicProfilePage() {
               <div className="flex flex-wrap gap-2">
                 {user.badges.map((b) => (
                   <Badge key={b.id} variant="outline" title={b.description}>
-                    {b.emoji} {b.label}
+                    {b.label}
                   </Badge>
                 ))}
               </div>
@@ -129,7 +129,7 @@ export default function PublicProfilePage() {
                     onClick={() => user.canEndorse && toggleEndorse(s)}
                   >
                     {s}
-                    {e?.count ? ` · ${e.count} ⭐` : ''}
+                    {e?.count ? ` · ${e.count}` : ''}
                   </Badge>
                 );
               })}

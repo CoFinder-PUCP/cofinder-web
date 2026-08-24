@@ -48,7 +48,7 @@ function describe(n: AppNotification): { text: string; href: string } {
       };
     case 'SKILL_ENDORSED':
       return {
-        text: `${actor} endorsó tu skill${n.data.skill ? ` de ${n.data.skill}` : ''} ⭐`,
+        text: `${actor} endorsó tu skill${n.data.skill ? ` de ${n.data.skill}` : ''}`,
         href: '/profile',
       };
     default:

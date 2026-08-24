@@ -29,7 +29,7 @@ export function ReportButton({
   });
 
   if (done) {
-    return <span className="text-xs text-muted-foreground">Reportado ✓ Gracias</span>;
+    return <span className="text-xs text-muted-foreground">Reportado. Gracias</span>;
   }
 
   return (

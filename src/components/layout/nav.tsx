@@ -13,10 +13,11 @@ import {
   UserCircle,
   ShieldCheck,
   LogOut,
-  Rocket,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { NotificationBell } from '@/components/notifications/notification-bell';
+import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { CofinderMark } from '@/components/brand/cofinder-mark';
 
 /**
  * Menús consolidados (estilo Instagram):
@@ -82,7 +83,7 @@ export function Nav() {
     <aside className="hidden md:flex group fixed left-0 top-0 z-40 h-full w-20 hover:w-60 flex-col overflow-hidden border-r bg-background px-3 py-5 transition-[width] duration-200">
       {/* Logo */}
       <Link href="/feed" title="CoFinder" className="flex items-center gap-4 h-10 px-2.5 mb-4">
-        <Rocket size={26} strokeWidth={1.9} className="shrink-0 text-primary" />
+        <CofinderMark className="h-7 w-auto shrink-0 text-foreground" />
         <span className="text-xl font-bold tracking-tight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           CoFinder
         </span>
@@ -105,6 +106,7 @@ export function Nav() {
         {isAdmin && (
           <RailLink {...ADMIN_LINK} active={isActive(ADMIN_LINK.matches)} />
         )}
+        <ThemeToggle variant="rail" />
         <button
           onClick={() => { clearAuth(); router.push('/'); }}
           title="Salir"
