@@ -46,6 +46,11 @@ function describe(n: AppNotification): { text: string; href: string } {
         text: `${actor} se inscribió a ${n.data.eventTitle ?? 'tu evento'}${n.data.projectTitle ? ` con ${n.data.projectTitle}` : ''}`,
         href: n.data.eventId ? `/events/${n.data.eventId}` : '/events',
       };
+    case 'MEETING_SCHEDULED':
+      return {
+        text: `${actor} agendó una reunión en ${project}${n.data.meetingTitle ? `: ${n.data.meetingTitle}` : ''}`,
+        href: n.data.projectId ? `/projects/${n.data.projectId}/meetings` : '/',
+      };
     case 'SKILL_ENDORSED':
       return {
         text: `${actor} endorsó tu skill${n.data.skill ? ` de ${n.data.skill}` : ''}`,
