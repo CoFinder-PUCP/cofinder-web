@@ -19,7 +19,8 @@ export type NotificationType =
   | 'MEMBER_REMOVED'
   | 'NEW_COMMENT'
   | 'EVENT_REGISTRATION'
-  | 'SKILL_ENDORSED';
+  | 'SKILL_ENDORSED'
+  | 'MEETING_SCHEDULED';
 
 export type ReportTargetType = 'PROJECT' | 'POST' | 'COMMENT' | 'USER' | 'EVENT';
 
@@ -204,6 +205,9 @@ export interface AppNotification {
     preview?: string;
     eventId?: string;
     eventTitle?: string;
+    meetingId?: string;
+    meetingTitle?: string;
+    startsAt?: string;
     skill?: string;
   };
 }
@@ -229,6 +233,20 @@ export interface AppEvent {
     user: UserSummary;
     project: { id: string; title: string; stage: ProjectStage } | null;
   }[];
+}
+
+// ─── Reuniones de equipo ──────────────────────────────────────────────────────
+
+export interface Meeting {
+  id: string;
+  title: string;
+  startsAt: string;
+  location: string | null;
+  notes: string | null;
+  projectId: string;
+  createdById: string | null;
+  createdBy: (UserSummary & { role?: UserRole }) | null;
+  createdAt: string;
 }
 
 export function formatEventDate(startsAt: string, endsAt?: string | null) {

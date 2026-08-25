@@ -362,6 +362,9 @@ export default function ProjectDetailPage() {
                   <Link href={`/chat/team/${project.id}`}>Chat del equipo</Link>
                 </Button>
                 <Button asChild variant="outline" size="sm">
+                  <Link href={`/projects/${project.id}/meetings`}>Reuniones</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm">
                   <Link href="/projects/mine">Editar en mis proyectos</Link>
                 </Button>
                 <Button asChild variant="outline" size="sm">
@@ -374,6 +377,9 @@ export default function ProjectDetailPage() {
                 <div className="flex gap-2">
                   <Button asChild size="sm">
                     <Link href={`/chat/team/${project.id}`}>Chat del equipo</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={`/projects/${project.id}/meetings`}>Reuniones</Link>
                   </Button>
                   <Button
                     variant="outline"
